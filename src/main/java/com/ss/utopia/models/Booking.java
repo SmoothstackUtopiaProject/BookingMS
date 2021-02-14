@@ -1,5 +1,7 @@
 package com.ss.utopia.models;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -21,14 +23,17 @@ public class Booking {
 	private Integer isActive;
 
 	@GeneratedValue(generator = "uuid")
-	@GenericGenerator(name = "uuid", strategy = "uuid2")
-	@Column(name = "confirmation_code")
+	@GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
+	@Column(name = "confirmation_code", columnDefinition = "VARCHAR(255)")
 	private String confirmationCode;
 
 	public Booking() {}
 	public Booking(Integer isActive) {
 		super();
 		this.isActive = isActive;
+
+		// TODO: replace generated UUIDs with UUID input from PaymentMS
+		this.confirmationCode = UUID.randomUUID().toString();
 	}
 
 	public Booking(Integer id, Integer isActive, String confirmationCode) {
