@@ -17,10 +17,10 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
   Optional<Booking> findByConfirmationCode(String confirmationCode);
 
   @Query(value = "SELECT * FROM booking WHERE is_active = ?1", nativeQuery = true)
-  List<Booking> findByStatus(String status);
+  List<Booking> findByStatus(Integer status);
 
   @Modifying
   @Transactional
-  @Query(value = "DELETE FROM user WHERE id = ?1", nativeQuery = true)
+  @Query(value = "DELETE FROM booking WHERE id = ?1", nativeQuery = true)
   void deleteById(Integer id);
 }

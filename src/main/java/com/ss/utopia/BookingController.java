@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ss.utopia.exception.BookingAlreadyExistsException;
 import com.ss.utopia.exception.BookingGuestNotFoundException;
 import com.ss.utopia.exception.BookingNotFoundException;
@@ -77,7 +79,8 @@ public class BookingController {
 	throws ConnectException, SQLException {
 
 		try{
-			List<Booking> bookingList = bookingService.findByStatus(status);
+			Integer statusId = Integer.parseInt(status);
+			List<Booking> bookingList = bookingService.findByStatus(statusId);
 			return !bookingList.isEmpty() 
 			? new ResponseEntity<>(bookingList, HttpStatus.OK)
 			: new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
@@ -89,16 +92,19 @@ public class BookingController {
 		}
 	}
 
-	@PostMapping("/guest/{email},{phone}")
-	public ResponseEntity<Object> insertByGuest(@PathVariable String email, @PathVariable String phone)
+	@PostMapping("/guest")
+	public ResponseEntity<Object> insertByGuest(@RequestBody String body)
 	throws ConnectException, SQLException {
 
 		try {
-			Booking newBooking = bookingService.insertByBookingGuest(email, phone);
+			BookingGuest guest = new ObjectMapper().readValue(body, BookingGuest.class);
+			Booking newBooking = bookingService.insertByBookingGuest(guest.getEmail(), guest.getPhone());
 			return new ResponseEntity<>(newBooking, HttpStatus.CREATED);
 
-		} catch(IllegalArgumentException | NullPointerException err) {
-			return new ResponseEntity<>(err.getMessage(), HttpStatus.BAD_REQUEST);
+		} catch(IllegalArgumentException | JsonProcessingException | NullPointerException err) {
+			return new ResponseEntity<>("Cannot process Guest contact information " + err.getMessage()
+			.substring(0, 1).toLowerCase() + err.getMessage()
+			.substring(1, err.getMessage().length()), HttpStatus.BAD_REQUEST);
 
 		} catch(BookingAlreadyExistsException err) {
 			return new ResponseEntity<>(err.getMessage(), HttpStatus.CONFLICT);
@@ -135,7 +141,7 @@ public class BookingController {
 			return new ResponseEntity<>(newBooking, HttpStatus.ACCEPTED);
 
 		} catch(IllegalArgumentException | NullPointerException err) {
-			return new ResponseEntity<>("Cannot process UserID " + err.getMessage()
+			return new ResponseEntity<>("Cannot process BookingID/StatusID " + err.getMessage()
 			.substring(0, 1).toLowerCase() + err.getMessage()
 			.substring(1, err.getMessage().length()), HttpStatus.BAD_REQUEST);
 
@@ -144,17 +150,17 @@ public class BookingController {
 		}
 	}
 
-	@PutMapping("/guest/{bookingIdString}/{email},{phone}")
-	public ResponseEntity<Object> updateBookingGuest(@PathVariable String bookingIdString, @PathVariable String email, @PathVariable String phone)
+	@PutMapping("/guest")
+	public ResponseEntity<Object> updateBookingGuest(@RequestBody String body)
 	throws ConnectException, SQLException {
 
 		try {
-			Integer bookingId = Integer.parseInt(bookingIdString);
-			BookingGuest newBookingGuest = bookingGuestService.update(bookingId, email, phone);
+			BookingGuest guest = new ObjectMapper().readValue(body, BookingGuest.class);
+			BookingGuest newBookingGuest = bookingGuestService.update(guest.getBookingId(), guest.getEmail(), guest.getPhone());
 			return new ResponseEntity<>(newBookingGuest, HttpStatus.ACCEPTED);
 
-		} catch(IllegalArgumentException | NullPointerException err) {
-			return new ResponseEntity<>("Cannot process UserID " + err.getMessage()
+		} catch(IllegalArgumentException | JsonProcessingException | NullPointerException err) {
+			return new ResponseEntity<>("Cannot process BookingID " + err.getMessage()
 			.substring(0, 1).toLowerCase() + err.getMessage()
 			.substring(1, err.getMessage().length()), HttpStatus.BAD_REQUEST);
 
@@ -163,32 +169,20 @@ public class BookingController {
 		}
 	}
 
-	@DeleteMapping("{bookingId}")
-	public ResponseEntity<Object> delete(@PathVariable Integer bookingId)
+	@DeleteMapping("{bookingIdString}")
+	public ResponseEntity<Object> delete(@PathVariable String bookingIdString)
 	throws ConnectException, SQLException  {
 
 		try {
+			Integer bookingId = Integer.parseInt(bookingIdString);
 			bookingService.delete(bookingId);
 			return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
 
 		} catch(IllegalArgumentException | NullPointerException err) {
-			return new ResponseEntity<>(err.getMessage(), HttpStatus.BAD_REQUEST);
-		} catch(BookingNotFoundException err) {
-			return new ResponseEntity<>(err.getMessage(), HttpStatus.NOT_FOUND);
-		}
-	}
+			return new ResponseEntity<>("Cannot process BookingID " + err.getMessage()
+			.substring(0, 1).toLowerCase() + err.getMessage()
+			.substring(1, err.getMessage().length()), HttpStatus.BAD_REQUEST);
 
-	@DeleteMapping("/confirmation/{confirmationCode}")
-	public ResponseEntity<Object> deleteByConfirmationCode(@PathVariable String confirmationCode)
-	throws ConnectException, SQLException  {
-
-		try {
-			Booking booking = bookingService.findByConfirmationCode(confirmationCode);
-			bookingService.delete(booking.getId());
-			return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
-
-		} catch(IllegalArgumentException | NullPointerException err) {
-			return new ResponseEntity<>(err.getMessage(), HttpStatus.BAD_REQUEST);
 		} catch(BookingNotFoundException err) {
 			return new ResponseEntity<>(err.getMessage(), HttpStatus.NOT_FOUND);
 		}

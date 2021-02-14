@@ -46,15 +46,15 @@ public class BookingService {
 		return optionalBooking.get();
 	}
 
-	public List<Booking> findByStatus(String status) throws ConnectException, 
+	public List<Booking> findByStatus(Integer statusId) throws ConnectException, 
 	IllegalArgumentException, SQLException {
-		return bookingRepository.findByStatus(status);
+		return bookingRepository.findByStatus(statusId);
 	}
 
 	public Booking insertByBookingUser(Integer userId) throws BookingAlreadyExistsException,
 	 ConnectException, IllegalArgumentException, SQLException {
 
-		Booking newBooking = bookingRepository.save(new Booking());
+		Booking newBooking = bookingRepository.save(new Booking(2));
 		bookingUserService.insert(newBooking.getId(), userId);
 		return newBooking;
 	}
@@ -62,7 +62,7 @@ public class BookingService {
 	public Booking insertByBookingGuest(String email, String phone) throws BookingAlreadyExistsException,
 	 ConnectException, IllegalArgumentException, SQLException {
 
-		Booking newBooking = bookingRepository.save(new Booking());
+		Booking newBooking = bookingRepository.save(new Booking(2));
 		bookingGuestService.insert(newBooking.getId(), email, phone);
 		return newBooking;
 	}
