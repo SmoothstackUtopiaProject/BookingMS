@@ -103,13 +103,13 @@ public class BookingService {
 		try {
 			BookingUser bookingUser = bookingUserService.findByBookingId(bookingId);
 			bookingWithReferenceData.setUserId(bookingUser.getUserId());
-		} catch(BookingUserNotFoundException err){
-			try {
-				BookingGuest bookingGuest = bookingGuestService.findByBookingId(bookingId);
-				bookingWithReferenceData.setGuestEmail(bookingGuest.getEmail());
-				bookingWithReferenceData.setGuestPhone(bookingGuest.getPhone());
-			} catch(BookingGuestNotFoundException err2){/* Nothing needed if not exists */}
-		}
+		} catch(BookingUserNotFoundException err){/* Nothing needed if not exists */}
+		
+		try {
+			BookingGuest bookingGuest = bookingGuestService.findByBookingId(bookingId);
+			bookingWithReferenceData.setGuestEmail(bookingGuest.getEmail());
+			bookingWithReferenceData.setGuestPhone(bookingGuest.getPhone());
+		} catch(BookingGuestNotFoundException err2){/* Nothing needed if not exists */}
 		
 		return bookingWithReferenceData;
 	}
@@ -170,7 +170,7 @@ public class BookingService {
 			newBookingWithReferenceData.setFlightId(newFlightBooking.getFlightId());
 		}
 
-		Optional<Passenger> optionalPassenger = passengerRepository.findByBookingId(bookingId);
+		Optional<Passenger> optionalPassenger = passengerRepository.findById(passengerId);
 		if(optionalPassenger.isPresent()) {
 			Passenger passenger = optionalPassenger.get();
 			passenger.setBookingId(bookingId);
@@ -183,13 +183,24 @@ public class BookingService {
 			BookingGuest newBookingGuest = bookingGuestService.update(bookingId, guestEmail, guestPhone);
 			newBookingWithReferenceData.setGuestEmail(newBookingGuest.getEmail());
 			newBookingWithReferenceData.setGuestPhone(newBookingGuest.getPhone());
-		} catch(BookingGuestNotFoundException err) {/* Ignore for now, TODO error handling for partial updates */}
+		} catch(BookingGuestNotFoundException err) {
+			try {
+				BookingGuest newBookingGuest = bookingGuestService.insert(bookingId, guestEmail, guestPhone);
+				newBookingWithReferenceData.setGuestEmail(newBookingGuest.getEmail());
+				newBookingWithReferenceData.setGuestPhone(newBookingGuest.getPhone());
+			} catch(BookingAlreadyExistsException err2){/* Ignore for now, TODO error handling for partial updates */}
+		}
 
 		try {
 			bookingUserService.findByBookingId(bookingId);
 			BookingUser newBookingUser = bookingUserService.update(bookingId, userId);
 			newBookingWithReferenceData.setUserId(newBookingUser.getBookingId());
-		} catch(BookingUserNotFoundException err) {/* Ignore for now, TODO error handling for partial updates */}
+		} catch(BookingUserNotFoundException err) {
+			try {
+				BookingUser newBookingUser = bookingUserService.insert(bookingId, userId);
+				newBookingWithReferenceData.setUserId(newBookingUser.getBookingId());
+			}catch(BookingAlreadyExistsException err2){/* Ignore for now, TODO error handling for partial updates */}
+		}
 
 		return newBookingWithReferenceData;
 	}
