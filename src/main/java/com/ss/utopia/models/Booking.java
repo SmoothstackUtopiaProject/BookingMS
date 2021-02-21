@@ -20,7 +20,7 @@ public class Booking {
 	private Integer id;
 
 	@Column(name = "is_active")
-	private Integer isActive;
+	private Integer status;
 
 	@GeneratedValue(generator = "uuid")
 	@GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
@@ -28,18 +28,18 @@ public class Booking {
 	private String confirmationCode;
 
 	public Booking() {}
-	public Booking(Integer isActive) {
+	public Booking(Integer status) {
 		super();
-		this.isActive = isActive;
+		this.status = status;
 
 		// TODO: replace generated UUIDs with UUID input from PaymentMS
 		this.confirmationCode = UUID.randomUUID().toString();
 	}
 
-	public Booking(Integer id, Integer isActive, String confirmationCode) {
+	public Booking(Integer id, Integer status, String confirmationCode) {
 		super();
 		this.id = id;
-		this.isActive = isActive;
+		this.status = status;
 		this.confirmationCode = confirmationCode;
 	}
 
@@ -51,12 +51,12 @@ public class Booking {
 		this.id = id;
 	}
 
-	public Integer getIsActive() {
-		return isActive;
+	public Integer getStatus() {
+		return status;
 	}
 
-	public void setIsActive(Integer isActive) {
-		this.isActive = isActive;
+	public void setstatus(Integer status) {
+		this.status = status;
 	}
 
 	public String getConfirmationCode() {

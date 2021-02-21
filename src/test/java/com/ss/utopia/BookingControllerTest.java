@@ -81,8 +81,8 @@ public class BookingControllerTest {
   }
 
   @Test
-  void test_validBookingModel_getIsActive() {
-    assertEquals(1, testBooking.getIsActive());
+  void test_validBookingModel_getStatus() {
+    assertEquals(1, testBooking.getStatus());
   }
 
   @Test
@@ -107,7 +107,7 @@ public class BookingControllerTest {
       assertEquals(testBookingList.size(), actual.size());
       for(int i = 0; i < testBookingList.size(); i++) {
         assertEquals(testBookingList.get(i).getId(), actual.get(i).getId());
-        assertEquals(testBookingList.get(i).getIsActive(), actual.get(i).getIsActive());
+        assertEquals(testBookingList.get(i).getStatus(), actual.get(i).getStatus());
         assertEquals(testBookingList.get(i).getConfirmationCode(), actual.get(i).getConfirmationCode());
       }
     } catch(Exception e) {
@@ -145,7 +145,7 @@ public class BookingControllerTest {
       .getResponse().getContentAsString(), Booking.class);
   
       assertEquals(testBooking.getId(), actual.getId());
-      assertEquals(testBooking.getIsActive(), actual.getIsActive());
+      assertEquals(testBooking.getStatus(), actual.getStatus());
       assertEquals(testBooking.getConfirmationCode(), actual.getConfirmationCode());
     } catch(Exception e) {
       fail();
@@ -197,7 +197,7 @@ public class BookingControllerTest {
       .getResponse().getContentAsString(), Booking.class);
   
       assertEquals(testBooking.getId(), actual.getId());
-      assertEquals(testBooking.getIsActive(), actual.getIsActive());
+      assertEquals(testBooking.getStatus(), actual.getStatus());
       assertEquals(testBooking.getConfirmationCode(), actual.getConfirmationCode());
     } catch(Exception e) {
       fail();
@@ -224,7 +224,7 @@ public class BookingControllerTest {
     try {
       Integer testStatusSearch = 3; // Should only return one Booking
       when(service.findByStatus(testStatusSearch)).thenReturn(testBookingList.stream()
-      .filter(i -> i.getIsActive().equals(3))
+      .filter(i -> i.getStatus().equals(3))
       .collect(Collectors.toList()));
 
       MvcResult response = mvc.perform(get(SERVICE_PATH_USERS + "/search?status=" + testStatusSearch)
@@ -247,7 +247,7 @@ public class BookingControllerTest {
     try {
       Integer testStatusSearch = 1; // Should return exactly 5 Bookings
       when(service.findByStatus(testStatusSearch)).thenReturn(testBookingList.stream()
-      .filter(i -> i.getIsActive().equals(1))
+      .filter(i -> i.getStatus().equals(1))
       .collect(Collectors.toList()));
 
       MvcResult response = mvc.perform(get(SERVICE_PATH_USERS + "/search?status=" + testStatusSearch)
@@ -270,7 +270,7 @@ public class BookingControllerTest {
     try {
       Integer testStatusSearch = -1; // Should return NO Bookings
       when(service.findByStatus(testStatusSearch)).thenReturn(testBookingList.stream()
-      .filter(i -> i.getIsActive().equals(-1))
+      .filter(i -> i.getStatus().equals(-1))
       .collect(Collectors.toList()));
 
       mvc.perform(get(SERVICE_PATH_USERS + "/search?status=" + testStatusSearch)
@@ -310,7 +310,7 @@ public class BookingControllerTest {
       .getResponse().getContentAsString(), Booking.class);
 
       assertEquals(testBooking.getId(), actual.getId());
-      assertEquals(testBooking.getIsActive(), actual.getIsActive());
+      assertEquals(testBooking.getStatus(), actual.getStatus());
       assertEquals(testBooking.getConfirmationCode(), actual.getConfirmationCode());
     } catch(Exception e) {
       fail();
@@ -349,7 +349,7 @@ public class BookingControllerTest {
       .getResponse().getContentAsString(), Booking.class);
 
       assertEquals(testBooking.getId(), actual.getId());
-      assertEquals(testBooking.getIsActive(), actual.getIsActive());
+      assertEquals(testBooking.getStatus(), actual.getStatus());
       assertEquals(testBooking.getConfirmationCode(), actual.getConfirmationCode());
     } catch(Exception e) {
       fail();
@@ -413,9 +413,9 @@ public class BookingControllerTest {
   void test_update_withValidBooking_thenStatus202() {    
     try {
       Booking newBooking = new Booking(testBooking.getId(), 7, testBooking.getConfirmationCode());
-      when(service.update(newBooking.getId(), newBooking.getIsActive())).thenReturn(newBooking);
+      when(service.update(newBooking.getId(), newBooking.getStatus())).thenReturn(newBooking);
 
-      MvcResult response = mvc.perform(put(SERVICE_PATH_USERS + "/" + newBooking.getId() + "," + newBooking.getIsActive())
+      MvcResult response = mvc.perform(put(SERVICE_PATH_USERS + "/" + newBooking.getId() + "," + newBooking.getStatus())
       .header("Accept", "application/json"))
       .andExpect(status().is(202))
       .andReturn();
@@ -424,7 +424,7 @@ public class BookingControllerTest {
       .getResponse().getContentAsString(), Booking.class);
 
       assertEquals(newBooking.getId(), actual.getId());
-      assertEquals(newBooking.getIsActive(), actual.getIsActive());
+      assertEquals(newBooking.getStatus(), actual.getStatus());
       assertEquals(newBooking.getConfirmationCode(), actual.getConfirmationCode());
     } catch(Exception e) {
       fail();
@@ -435,9 +435,9 @@ public class BookingControllerTest {
   void test_update_withInvalidBooking_thenStatus404() {    
     try {
       Booking newBooking = testBooking;
-      when(service.update(newBooking.getId(), newBooking.getIsActive())).thenThrow(new BookingNotFoundException());
+      when(service.update(newBooking.getId(), newBooking.getStatus())).thenThrow(new BookingNotFoundException());
 
-      mvc.perform(put(SERVICE_PATH_USERS + "/" + newBooking.getId() + "," + newBooking.getIsActive())
+      mvc.perform(put(SERVICE_PATH_USERS + "/" + newBooking.getId() + "," + newBooking.getStatus())
       .header("Accept", "application/json"))
       .andExpect(status().is(404))
       .andReturn();
