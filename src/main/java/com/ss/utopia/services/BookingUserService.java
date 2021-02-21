@@ -2,6 +2,7 @@ package com.ss.utopia.services;
 
 import java.net.ConnectException;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 
 import com.ss.utopia.exception.BookingAlreadyExistsException;
@@ -17,6 +18,10 @@ public class BookingUserService {
   
 	@Autowired 
 	BookingUserRepository bookingUserRepository;
+
+	public List<BookingUser> findAll() throws ConnectException, IllegalArgumentException, SQLException {
+		return bookingUserRepository.findAll();
+	}
 
 	public BookingUser findByBookingId(Integer bookingId) throws BookingUserNotFoundException, 
 	ConnectException, IllegalArgumentException, SQLException {
