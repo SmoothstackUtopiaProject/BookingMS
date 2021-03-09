@@ -17,53 +17,49 @@ public class Booking {
 	@Id
 	@GeneratedValue
 	@Column(name = "id")
-	private Integer id;
+	private Integer bookingId;
 
-	@Column(name = "is_active")
-	private Integer isActive;
+	@Column(name = "status")
+	private String bookingStatus;
 
 	@GeneratedValue(generator = "uuid")
 	@GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
 	@Column(name = "confirmation_code", columnDefinition = "VARCHAR(255)")
-	private String confirmationCode;
+	private String bookingConfirmationCode;
 
 	public Booking() {}
-	public Booking(Integer isActive) {
-		super();
-		this.isActive = isActive;
-
-		// TODO: replace generated UUIDs with UUID input from PaymentMS
-		this.confirmationCode = UUID.randomUUID().toString();
+	public Booking(String bookingStatus) {
+		this.bookingStatus = bookingStatus;
+		this.bookingConfirmationCode = UUID.randomUUID().toString();
 	}
 
-	public Booking(Integer id, Integer isActive, String confirmationCode) {
-		super();
-		this.id = id;
-		this.isActive = isActive;
-		this.confirmationCode = confirmationCode;
+	public Booking(Integer bookingId, String bookingStatus, String bookingConfirmationCode) {
+		this.bookingId = bookingId;
+		this.bookingStatus = bookingStatus;
+		this.bookingConfirmationCode = bookingConfirmationCode;
 	}
 
-	public Integer getId() {
-		return id;
+	public Integer getBookingId() {
+		return bookingId;
 	}
 
-	public void setId(Integer id) {
-		this.id = id;
+	public void setBookingId(Integer bookingId) {
+		this.bookingId = bookingId;
 	}
 
-	public Integer getIsActive() {
-		return isActive;
+	public String getBookingStatus() {
+		return bookingStatus;
 	}
 
-	public void setIsActive(Integer isActive) {
-		this.isActive = isActive;
+	public void setBookingStatus(String bookingStatus) {
+		this.bookingStatus = bookingStatus;
 	}
 
-	public String getConfirmationCode() {
-		return confirmationCode;
+	public String getBookingConfirmationCode() {
+		return bookingConfirmationCode;
 	}
 
-	public void setConfirmationCode(String confirmationCode) {
-		this.confirmationCode = confirmationCode;
+	public void setBookingConfirmationCode(String bookingConfirmationCode) {
+		this.bookingConfirmationCode = bookingConfirmationCode;
 	}
 }

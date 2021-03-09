@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
   @Query(value = "SELECT * FROM booking WHERE confirmation_code = ?1", nativeQuery = true)
-  Optional<Booking> findByConfirmationCode(String confirmationCode);
+  Optional<Booking> findByBookingConfirmationCode(String confirmationCode);
 
   @Query(value = "SELECT * FROM booking WHERE is_active = ?1", nativeQuery = true)
   List<Booking> findByStatus(Integer status);

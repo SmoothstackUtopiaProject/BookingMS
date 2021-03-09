@@ -4,9 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class UtopiaBookingMSApplication {
+public class BookingMS {
 
 	public static void main(String[] args) {
-		SpringApplication.run(UtopiaBookingMSApplication.class, args);
+		SpringApplication.run(BookingMS.class, args);
 	}
 }

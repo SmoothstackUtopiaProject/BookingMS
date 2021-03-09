@@ -14,22 +14,14 @@ public class BookingUser {
 	private Integer bookingId;
 
 	@Column(name = "user_id")
-	private Integer userId;
+	private Integer bookingUserId;
 
   public BookingUser(){}
-  public BookingUser(Integer bookingId, Integer userId) {
+  public BookingUser(Integer bookingId, Integer bookingUserId) {
     super();
     this.bookingId = bookingId;
-    this.userId = userId;
+    this.bookingUserId = bookingUserId;
   }
-
-	public Integer getUserId() {
-		return this.userId;
-	}
-
-	public void setUserId(Integer userId) {
-		this.userId = userId;
-	}
 
 	public Integer getBookingId() {
 		return this.bookingId;
@@ -37,5 +29,13 @@ public class BookingUser {
 
 	public void setBookingId(Integer bookingId) {
 		this.bookingId = bookingId;
+	}
+
+	public Integer getBookingUserId() {
+		return this.bookingUserId;
+	}
+
+	public void setBookingUserId(Integer bookingUserId) {
+		this.bookingUserId = bookingUserId;
 	}
 }
