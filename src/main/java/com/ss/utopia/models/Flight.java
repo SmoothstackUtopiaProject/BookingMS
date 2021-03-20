@@ -5,7 +5,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
@@ -15,11 +14,11 @@ public class Flight {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "flightId")
+	@Column(name = "id")
 	private Integer flightId;
 
 	@NotNull(message = "Route ID should not be empty")
-	@JoinColumn(name = "route_id")
+	@Column(name = "route_id")
 	private Integer flightRouteId;
 
 	@NotNull(message = "Airplane ID should not be empty")
@@ -61,7 +60,8 @@ public class Flight {
 		this.flightStatus = flightStatus;
 	}
 
-	public Flight(Integer flightRouteId, Integer flightAirplaneId, String flightDepartureTime, Integer flightSeatingId, Integer flightDuration,String flightStatus) {
+	public Flight(Integer flightRouteId, Integer flightAirplaneId, String flightDepartureTime, 
+	Integer flightSeatingId, Integer flightDuration,String flightStatus) {
 		this.flightRouteId = flightRouteId;
 		this.flightAirplaneId = flightAirplaneId;
 		this.flightDepartureTime = flightDepartureTime;

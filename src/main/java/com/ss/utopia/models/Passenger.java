@@ -56,7 +56,7 @@ public class Passenger {
     this.passengerPassportId = passengerPassportId;
     this.passengerFirstName = passengerFirstName;
     this.passengerLastName = passengerLastName;
-    this.passengerDateOfBirth = passengerDateOfBirth;
+    this.passengerDateOfBirth = Date.valueOf(passengerDateOfBirth.toLocalDate());
     this.passengerSex = passengerSex;
     this.passengerAddress = passengerAddress;
     this.passengerIsVeteran = passengerIsVeteran;
@@ -78,7 +78,7 @@ public class Passenger {
     this.passengerPassportId = passengerPassportId;
     this.passengerFirstName = passengerFirstName;
     this.passengerLastName = passengerLastName;
-    this.passengerDateOfBirth = passengerDateOfBirth;
+    this.passengerDateOfBirth = Date.valueOf(passengerDateOfBirth.toLocalDate());
     this.passengerSex = passengerSex;
     this.passengerAddress = passengerAddress;
     this.passengerIsVeteran = passengerIsVeteran;
@@ -125,15 +125,15 @@ public class Passenger {
   }
 
   public Date getPassengerDateOfBirth() {
-    return this.passengerDateOfBirth;
+    return Date.valueOf(passengerDateOfBirth.toLocalDate());
   }
 
   public void setPassengerDateOfBirth(Date passengerDateOfBirth) {
-    this.passengerDateOfBirth = passengerDateOfBirth;
+    this.passengerDateOfBirth = Date.valueOf(passengerDateOfBirth.toLocalDate());
   }
 
   public String getPassengerSex() {
-    return this.passengerSex;
+    return passengerSex;
   }
 
   public void setPassengerSex(String passengerSex) {
@@ -141,7 +141,7 @@ public class Passenger {
   }
 
   public String getPassengerAddress() {
-    return this.passengerAddress;
+    return passengerAddress;
   }
 
   public void setPassengerAddress(String passengerAddress) {

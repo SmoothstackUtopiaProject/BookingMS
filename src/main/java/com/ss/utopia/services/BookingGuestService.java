@@ -1,7 +1,5 @@
 package com.ss.utopia.services;
 
-import java.net.ConnectException;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -20,117 +18,122 @@ import org.springframework.stereotype.Service;
 public class BookingGuestService {
   
 	@Autowired 
-	BookingGuestRepository bookingGuestRepository;
+	private BookingGuestRepository bookingGuestRepository;
 
 	@Autowired 
-	BookingService bookingService;
+	private BookingService bookingService;
 
-	public List<BookingGuest> findAll() throws ConnectException, IllegalArgumentException, SQLException {
+	private static final Pattern REGEX_EMAIL = Pattern.compile("[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,15}/g");
+  private static final Pattern REGEX_PHONE = Pattern.compile("^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-s./0-9]*$");
+
+	public List<BookingGuest> findAll() {
 		return bookingGuestRepository.findAll();
 	}
 
-	public BookingGuest findByBookingId(Integer bookingId) throws BookingGuestNotFoundException, 
-  ConnectException, SQLException {
-		
-		try {
-			Optional<BookingGuest> optionalBookingGuest = bookingGuestRepository.findById(bookingId);
-			if(!optionalBookingGuest.isPresent()) throw new BookingGuestNotFoundException("No Guests exists for Booking ID: " + bookingId + ".");
-			return optionalBookingGuest.get();
-		} catch(IllegalArgumentException err) {
-			throw new BookingGuestNotFoundException("No Guests exists for Booking ID: " + bookingId + ".");
+	public BookingGuest findByBookingId(Integer bookingId) throws BookingGuestNotFoundException {
+		Optional<BookingGuest> optionalBookingGuest = bookingGuestRepository.findById(bookingId);
+		if(!optionalBookingGuest.isPresent()) {
+			throw new BookingGuestNotFoundException(
+				"No Guests exists for Booking ID: " + bookingId + "."
+			);
 		}
+		return optionalBookingGuest.get();
 	}
 
-  public BookingGuest findByEmail(String email) throws BookingGuestNotFoundException, 
-	ConnectException, IllegalArgumentException, SQLException {
-		
+  public BookingGuest findByEmail(String email) throws BookingGuestNotFoundException {
 		Optional<BookingGuest> optionalBookingGuest = bookingGuestRepository.findByEmail(email);
-		if(!optionalBookingGuest.isPresent()) throw new BookingGuestNotFoundException("No Guests exists for email: " + email + ".");
+		if(!optionalBookingGuest.isPresent()) {
+			throw new BookingGuestNotFoundException(
+				"No Guests exists for email: " + email + "."
+			);
+		}
 		return optionalBookingGuest.get();
 	}
 
-	public BookingGuest findByPhone(String phone) throws BookingGuestNotFoundException, 
-  ConnectException, IllegalArgumentException, SQLException {
-		
+	public BookingGuest findByPhone(String phone) throws BookingGuestNotFoundException {
 		Optional<BookingGuest> optionalBookingGuest = bookingGuestRepository.findByPhone(phone);
-		if(!optionalBookingGuest.isPresent()) throw new BookingGuestNotFoundException("No Guests exists for phone number: " + phone + ".");
+		if(!optionalBookingGuest.isPresent()) {
+			throw new BookingGuestNotFoundException(
+				"No Guests exists for phone number: " + phone + "."
+			);
+		}
 		return optionalBookingGuest.get();
 	}
 
-	public BookingGuest insert(Integer bookingId, String email, String phone) throws BookingAlreadyExistsException, 
-  ConnectException, IllegalArgumentException, SQLException {
+	public BookingGuest insert(Integer bookingId, String email, String phone) throws BookingAlreadyExistsException {
 
-    String formattedEmail = formatGeneric(email);
-		String formattedPhone = formatPhone(phone);
+		boolean isEmailValid = validateEmail(email);
+		if(!isEmailValid) {
+			throw new IllegalArgumentException(
+				"The email: " + email + " is not valid!"
+				);
+			}
+			
+		boolean isPhoneValid = validatePhone(phone);
+		if(!isPhoneValid) {
+			throw new IllegalArgumentException(
+				"The phone number: " + phone + " is not valid!"
+			);
+		}
 
-		if(!validateEmail(formattedEmail)) throw new IllegalArgumentException("The email: " + email + " is not valid!");
-		if(!validatePhone(formattedPhone)) throw new IllegalArgumentException("The phone number: " + phone + " is not valid!");
-		
 		Optional<BookingGuest> optionalBookingGuest = bookingGuestRepository.findById(bookingId);
 		if(optionalBookingGuest.isPresent()) {
-      throw new BookingAlreadyExistsException("A Booking already exists for Booking ID: " + bookingId + ".");
-    } else {
-      return bookingGuestRepository.save(new BookingGuest(bookingId, email, phone));
+      throw new BookingAlreadyExistsException(
+				"A Booking already exists for Booking ID: " + bookingId + "."
+			);
     }
+		return bookingGuestRepository.save(new BookingGuest(bookingId, email, phone));
 	}
 
-  public BookingGuest update(Integer bookingId, String email, String phone) throws BookingNotFoundException, 
-  ConnectException, IllegalArgumentException, SQLException {
-
+  public BookingGuest update(Integer bookingId, String email, String phone) 
+	throws BookingNotFoundException, IllegalArgumentException {
 		bookingService.findById(bookingId);
 
-		String formattedEmail = formatGeneric(email);
-		String formattedPhone = formatPhone(phone);
+		boolean isEmailValid = validateEmail(email);
+		if(!isEmailValid) {
+			throw new IllegalArgumentException(
+				"The email: " + email + " is not valid!"
+				);
+			}
+			
+		boolean isPhoneValid = validatePhone(phone);
+		if(!isPhoneValid) {
+			throw new IllegalArgumentException(
+				"The phone number: " + phone + " is not valid!"
+			);
+		}
 
-		if(!validateEmail(formattedEmail)) throw new IllegalArgumentException("The email: " + email + " is not valid!");
-		if(!validatePhone(formattedPhone)) throw new IllegalArgumentException("The phone number: " + phone + " is not valid!");
-
+		// Determine whether a new BookingGuest is needed here or an existing BookingGuest is being updated
 		try {
 			BookingGuest bookingGuest = findByBookingId(bookingId);
-			bookingGuest.setBookingGuestEmail(formattedEmail);
-			bookingGuest.setBookingGuestPhone(formattedPhone);
+			bookingGuest.setBookingGuestEmail(email);
+			bookingGuest.setBookingGuestPhone(phone);
 			return bookingGuestRepository.save(bookingGuest);
-		} catch(BookingGuestNotFoundException err) {
-			return bookingGuestRepository.save(new BookingGuest(bookingId, formattedEmail, formattedPhone));
+		} 
+		catch(BookingGuestNotFoundException err) {
+			return bookingGuestRepository.save(new BookingGuest(bookingId, email, phone));
 		}
 	}
 
-	public void delete(Integer bookingId) throws BookingGuestNotFoundException, 
-	ConnectException, SQLException {
-
+	public void delete(Integer bookingId) throws BookingGuestNotFoundException {
 		findByBookingId(bookingId);
 		bookingGuestRepository.deleteByBookingId(bookingId);
 	}
 
-	public long deleteByBookingId(Integer bookingId) throws ConnectException, SQLException {
-
+	public long deleteByBookingId(Integer bookingId) {
 		long preRowsCount = bookingGuestRepository.count();
 		bookingGuestRepository.deleteByBookingId(bookingId);
 		long postRowsCount = bookingGuestRepository.count();
 		return preRowsCount - postRowsCount;
 	}
 
-  private String formatGeneric(String name) {
-		return name.trim().toUpperCase();
+	private static Boolean validateEmail(String email) {
+		Matcher matcher = REGEX_EMAIL.matcher(email);
+		return matcher.matches();
 	}
 
-	private String formatPhone(String phone) {
-		return phone.replaceAll("[^0-9]", "");
-	}
-
-	private Boolean validateEmail(String email) {
-		Pattern pattern = Pattern.compile("^(.+)@(.+)$");
-		Matcher matcher = pattern.matcher(email);
-		return email != null &&
-		matcher.matches() && 
-		email.length() < 256 && 
-		!email.isEmpty();
-	}
-
-	private Boolean validatePhone(String phone) {
-		return phone != null &&
-		phone.length() < 46 &&
-		phone.replaceAll("[^0-9#]", "").length() == phone.length() &&
-		!phone.isEmpty();
+	private static Boolean validatePhone(String phone) {
+		Matcher matcher = REGEX_PHONE.matcher(phone);
+		return matcher.matches();
 	}
 }

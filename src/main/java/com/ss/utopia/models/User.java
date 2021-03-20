@@ -1,13 +1,14 @@
 package com.ss.utopia.models;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "user")
@@ -17,27 +18,41 @@ public class User {
 	@GeneratedValue
 	@Column(name = "id")
 	private Integer userId;
-	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "role_id")
-	private Integer userRoleId;
+
+	@NotNull(message = "First name should not be empty")
 	@Column(name = "first_name")
 	private String userFirstName;
+
+	@NotNull(message = "Last name should not be empty")
 	@Column(name = "last_name")
 	private String userLastName;
+
+	@NotNull(message = "Email should not be empty")
 	@Column(name = "email")
+	// @Email(message = "Email should be valid")
 	private String userEmail;
+
+	@NotNull(message = "Password should not be empty")
 	@Column(name = "password")
 	private String userPassword;
+
+	@NotNull(message = "Phone number should not be empty")
 	@Column(name = "phone")
 	private String userPhone;
-	
-	
+
+	@NotNull(message = "Role should not be empty")
+	@Enumerated(EnumType.STRING)
+	@Column(name = "role")
+	private Role userRole;
+
+	@Transient
+	private String userToken;
+
 	public User() {}
-	public User(Integer userId, Integer userRoleId, String userFirstName, 
-	String userLastName, String userEmail, String userPassword, String userPhone) {
-		super();
-		this.userId = userId;
-		this.userRoleId = userRoleId;
+	public User(Role userRole, String userFirstName, String userLastName, 
+	String userEmail, String userPassword, String userPhone) {
+
+		this.userRole = userRole;
 		this.userFirstName = userFirstName;
 		this.userLastName = userLastName;
 		this.userEmail = userEmail;
@@ -45,35 +60,28 @@ public class User {
 		this.userPhone = userPhone;
 	}
 
-	public User(Integer userRoleId, String userFirstName, 
-	String userLastName, String userEmail, String userPassword, String userPhone) {
-		super();
-		this.userRoleId = userRoleId;
+	public User(Role userRole, String userFirstName, String userLastName, 
+	String userEmail, String userPassword, String userPhone, String userToken) {
+
 		this.userFirstName = userFirstName;
 		this.userLastName = userLastName;
 		this.userEmail = userEmail;
 		this.userPassword = userPassword;
 		this.userPhone = userPhone;
+		this.userRole = userRole;
+		this.userToken = userToken;
 	}
 
 	public Integer getUserId() {
-		return userId;
+		return this.userId;
 	}
 
 	public void setUserId(Integer userId) {
 		this.userId = userId;
 	}
 
-	public Integer getInteger() {
-		return userRoleId;
-	}
-
-	public void setInteger(Integer userRoleId) {
-		this.userRoleId = userRoleId;
-	}
-
 	public String getUserFirstName() {
-		return userFirstName;
+		return this.userFirstName;
 	}
 
 	public void setUserFirstName(String userFirstName) {
@@ -81,7 +89,7 @@ public class User {
 	}
 
 	public String getUserLastName() {
-		return userLastName;
+		return this.userLastName;
 	}
 
 	public void setUserLastName(String userLastName) {
@@ -89,7 +97,7 @@ public class User {
 	}
 
 	public String getUserEmail() {
-		return userEmail;
+		return this.userEmail;
 	}
 
 	public void setUserEmail(String userEmail) {
@@ -97,7 +105,7 @@ public class User {
 	}
 
 	public String getUserPassword() {
-		return userPassword;
+		return this.userPassword;
 	}
 
 	public void setUserPassword(String userPassword) {
@@ -105,10 +113,27 @@ public class User {
 	}
 
 	public String getUserPhone() {
-		return userPhone;
+		return this.userPhone;
 	}
 
 	public void setUserPhone(String userPhone) {
 		this.userPhone = userPhone;
+	}
+
+	public Role getUserRole() {
+		return this.userRole;
+	}
+
+	public void setUserRole(Role userRole) {
+		this.userRole = userRole;
+	}
+
+
+	public String getUserToken() {
+		return this.userToken;
+	}
+
+	public void setUserToken(String userToken) {
+		this.userToken = userToken;
 	}
 }

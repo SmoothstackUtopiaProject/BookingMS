@@ -26,7 +26,8 @@ public class BookingWithReferenceData {
 	}
 
 	public BookingWithReferenceData(Integer bookingId, String bookingStatus, String bookingConfirmationCode, 
-	Integer bookingFlightId, Integer bookingPassengerId, Integer bookingUserId, String bookingGuestEmail, String bookingGuestPhone) {
+	Integer bookingFlightId, Integer bookingPassengerId, Integer bookingUserId, String bookingGuestEmail, 
+	String bookingGuestPhone) {
 		super();
 		this.bookingId = bookingId;
 		this.bookingStatus = bookingStatus;

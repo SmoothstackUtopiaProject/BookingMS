@@ -1,21 +1,18 @@
 package com.ss.utopia.services;
 
-import java.net.ConnectException;
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ss.utopia.exceptions.BookingAlreadyExistsException;
 import com.ss.utopia.exceptions.BookingGuestNotFoundException;
 import com.ss.utopia.exceptions.BookingNotFoundException;
 import com.ss.utopia.exceptions.BookingUserNotFoundException;
+import com.ss.utopia.filters.BookingFilters;
 import com.ss.utopia.models.Booking;
 import com.ss.utopia.models.BookingGuest;
 import com.ss.utopia.models.BookingUser;
@@ -31,33 +28,33 @@ import com.ss.utopia.repositories.PassengerRepository;
 public class BookingService {
 	
 	@Autowired
-	BookingRepository bookingRepository;
+	private BookingRepository bookingRepository;
 
 	@Autowired 
-	BookingGuestService bookingGuestService;
+	private BookingGuestService bookingGuestService;
 
 	@Autowired 
-	BookingUserService bookingUserService;
+	private BookingUserService bookingUserService;
 
 	@Autowired 
-	FlightBookingRepository flightBookingRepository;
+	private FlightBookingRepository flightBookingRepository;
 
 	@Autowired 
-	PassengerRepository passengerRepository;
+	private PassengerRepository passengerRepository;
 
 
-	public List<Booking> findAll() throws ConnectException, IllegalArgumentException, SQLException {
+	public List<Booking> findAll() {
 		return bookingRepository.findAll();
 	}
 
-	public List<BookingWithReferenceData> findAllWithReferenceData() throws ConnectException, IllegalArgumentException, SQLException {
+	public List<BookingWithReferenceData> findAllWithReferenceData() {
 		List<Booking> bookings = bookingRepository.findAll();
 		List<BookingGuest> bookingGuests = bookingGuestService.findAll();
 		List<BookingUser> bookingUsers = bookingUserService.findAll();
 		List<FlightBooking> flightBookings = flightBookingRepository.findAll();
 		List<Passenger> passengers = passengerRepository.findAll();
 
-		List<BookingWithReferenceData> bookingsWithNames = new ArrayList<BookingWithReferenceData>();
+		List<BookingWithReferenceData> bookingsWithNames = new ArrayList<>();
 		for(Booking booking : bookings) {
 			BookingWithReferenceData newBookingWithReferenceData = new BookingWithReferenceData(
 				booking.getBookingId(), 
@@ -95,19 +92,24 @@ public class BookingService {
 		return bookingsWithNames;
 	}
 
-	public Booking findById(Integer bookingId) throws BookingNotFoundException, 
-	ConnectException, IllegalArgumentException, SQLException {
-		
+	public Booking findById(Integer bookingId) throws BookingNotFoundException {
 		Optional<Booking> optionalBooking = bookingRepository.findById(bookingId);
-		if(!optionalBooking.isPresent()) throw new BookingNotFoundException("No booking with ID: " + bookingId + " exist!");
+		if(!optionalBooking.isPresent()) { 
+			throw new BookingNotFoundException(
+				"No booking with ID: " + bookingId + " exist!"
+			);
+		}
 		return optionalBooking.get();
 	}
 
-	public BookingWithReferenceData findByIdWithReferenceData(Integer bookingId) throws BookingNotFoundException, 
-	ConnectException, IllegalArgumentException, SQLException {
-
+	public BookingWithReferenceData findByIdWithReferenceData(Integer bookingId) throws BookingNotFoundException {
 		Optional<Booking> optionalBooking = bookingRepository.findById(bookingId);
-		if(!optionalBooking.isPresent()) throw new BookingNotFoundException("No booking with ID: " + bookingId + " exist!");
+		if(!optionalBooking.isPresent()) {
+			throw new BookingNotFoundException(
+				"No booking with ID: " + bookingId + " exist!"
+			);
+		}
+
 		Booking booking = optionalBooking.get();
 		BookingWithReferenceData bookingWithReferenceData = new BookingWithReferenceData(
 			booking.getBookingId(), 
@@ -117,160 +119,39 @@ public class BookingService {
 		);
 
 		Optional<FlightBooking> optionalFlightBooking = flightBookingRepository.findById(bookingId);
-		if(optionalFlightBooking.isPresent()) bookingWithReferenceData.setBookingFlightId(optionalFlightBooking.get().getFlightId());
+		if(optionalFlightBooking.isPresent()) {
+			bookingWithReferenceData.setBookingFlightId(optionalFlightBooking.get().getFlightId());
+		}
 
 		Optional<Passenger> optionalPassenger = passengerRepository.findByBookingId(bookingId);
-		if(optionalPassenger.isPresent()) bookingWithReferenceData.setBookingPassengerId(optionalPassenger.get().getPassengerId());
+		if(optionalPassenger.isPresent()) {
+			bookingWithReferenceData.setBookingPassengerId(optionalPassenger.get().getPassengerId());
+		}
 
 		try {
 			BookingUser bookingUser = bookingUserService.findByBookingId(bookingId);
 			bookingWithReferenceData.setBookingUserId(bookingUser.getBookingUserId());
-		} catch(BookingUserNotFoundException err){/* Nothing needed if not exists */}
+		} 
+		catch(BookingUserNotFoundException err){/* Nothing needed if not exists */}
 		
 		try {
 			BookingGuest bookingGuest = bookingGuestService.findByBookingId(bookingId);
 			bookingWithReferenceData.setBookingGuestEmail(bookingGuest.getBookingGuestEmail());
 			bookingWithReferenceData.setBookingGuestPhone(bookingGuest.getBookingGuestPhone());
-		} catch(BookingGuestNotFoundException err2){/* Nothing needed if not exists */}
-		
+		} 
+		catch(BookingGuestNotFoundException err2){/* Nothing needed if not exists */}
 		return bookingWithReferenceData;
 	}
 	
-	public List<BookingWithReferenceData> findBySearchAndFilter(HashMap<String, String> filterMap) 
-	throws ConnectException, SQLException {
+	public List<BookingWithReferenceData> findBySearchAndFilter(Map<String, String> filterMap) {
 		List<BookingWithReferenceData> bookings = findAllWithReferenceData();
-		if(!filterMap.keySet().isEmpty()) bookings = applyFilters(bookings, filterMap);
+		if(!filterMap.keySet().isEmpty()) {
+			bookings = BookingFilters.apply(bookings, filterMap);
+		}
 		return bookings;
 	}
 
-	public List<BookingWithReferenceData> applyFilters(List<BookingWithReferenceData> bookings, HashMap<String, String> filterMap) {
-		// Booking ID
-		String bookingId = "bookingId";
-		if(filterMap.keySet().contains(bookingId)) {
-			try {
-				Integer parsedBookingId = Integer.parseInt(filterMap.get(bookingId));
-				bookings = bookings.stream()
-				.filter(i -> i.getBookingId().equals(parsedBookingId))
-				.collect(Collectors.toList());
-			} catch(Exception err){/*Do nothing*/}
-		}
-
-		// Booking Status
-		String bookingStatus = "bookingStatus";
-		if(filterMap.keySet().contains(bookingStatus)) {
-			try {
-				String parsedBookingStatus = filterMap.get(bookingStatus);
-				bookings = bookings.stream()
-				.filter(i -> i.getBookingStatus().equals(parsedBookingStatus))
-				.collect(Collectors.toList());
-			} catch(Exception err){/*Do nothing*/}
-		}
-
-		// Booking Confirmation Code
-		String bookingConfirmationCode = "bookingConfirmationCode";
-		if(filterMap.keySet().contains(bookingConfirmationCode)) {
-			try {
-				String parsedBookingConfirmationCode = filterMap.get(bookingConfirmationCode);
-				bookings = bookings.stream()
-				.filter(i -> i.getBookingConfirmationCode().equals(parsedBookingConfirmationCode))
-				.collect(Collectors.toList());
-			} catch(Exception err){/*Do nothing*/}
-		}
-
-		// Booking Flight ID
-		String bookingFlightId = "bookingFlightId";
-		if(filterMap.keySet().contains(bookingFlightId)) {
-			try {
-				Integer parsedBookingFlightId = Integer.parseInt(filterMap.get(bookingFlightId));
-				bookings = bookings.stream()
-				.filter(i -> i.getBookingFlightId().equals(parsedBookingFlightId))
-				.collect(Collectors.toList());
-			} catch(Exception err){/*Do nothing*/}
-		}
-
-		// Booking User ID
-		String bookingUserId = "bookingUserId";
-		if(filterMap.keySet().contains(bookingUserId)) {
-			try {
-				Integer parsedBookingUserId = Integer.parseInt(filterMap.get(bookingUserId));
-				bookings = bookings.stream()
-				.filter(i -> i.getBookingUserId().equals(parsedBookingUserId))
-				.collect(Collectors.toList());
-			} catch(Exception err){/*Do nothing*/}
-		}
-
-		// Booking Guest Email
-		String bookingGuestEmail = "bookingGuestEmail";
-		if(filterMap.keySet().contains(bookingGuestEmail)) {
-			try {
-				String parsedBookingGuestEmail = filterMap.get(bookingGuestEmail);
-				bookings = bookings.stream()
-				.filter(i -> i.getBookingGuestEmail().equals(parsedBookingGuestEmail))
-				.collect(Collectors.toList());
-			} catch(Exception err){/*Do nothing*/}
-		}
-
-		// Booking Guest Phone
-		String bookingGuestPhone = "bookingGuestPhone";
-		if(filterMap.keySet().contains(bookingGuestPhone)) {
-			try {
-				String parsedBookingGuestPhone = filterMap.get(bookingGuestPhone);
-				bookings = bookings.stream()
-				.filter(i -> i.getBookingGuestPhone().equals(parsedBookingGuestPhone))
-				.collect(Collectors.toList());
-			} catch(Exception err){/*Do nothing*/}
-		}
-
-		// Search - (applied last due to save CPU usage
-		return applySearch(bookings, filterMap);
-	}
-
-	public List<BookingWithReferenceData> applySearch(List<BookingWithReferenceData> bookings, HashMap<String, String> filterMap) {
-		List<BookingWithReferenceData> bookingsWithSearchTerms = new ArrayList<BookingWithReferenceData>();
-		
-		String searchTerms = "searchTerms";
-		if(filterMap.keySet().contains(searchTerms)) {
-			String formattedSearch = filterMap.get(searchTerms)
-			.toLowerCase()
-			.replace(", ", ",");
-			String[] splitTerms = formattedSearch.split(",");
-			ObjectMapper mapper = new ObjectMapper();
-			
-			for(BookingWithReferenceData booking : bookings) {
-				boolean containsSearchTerms = true;
-				
-				try {
-					String bookingAsString = mapper.writeValueAsString(booking)
-					.toLowerCase()
-					.replace("bookingid", "")
-					.replace("bookingstatus", "")
-					.replace("bookingconfirmationcode", "")
-					.replace("bookingflightid", "")
-					.replace("bookinguserid", "")
-					.replace("bookingguestemail", "")
-					.replace("bookingguestphone", "");
-
-					for(String term : splitTerms) {
-						if(!bookingAsString.contains(term)) {
-							containsSearchTerms = false;
-							break;
-						}
-					}
-				} catch(JsonProcessingException err){
-					containsSearchTerms = false;
-				}
-
-				if(containsSearchTerms) {
-					bookingsWithSearchTerms.add(booking);
-				}
-			}
-		}
-		return bookingsWithSearchTerms;
-	}
-
-	public BookingWithReferenceData insert(HashMap<String, String> bookingMap) 
-	throws BookingUserNotFoundException, ConnectException, IllegalArgumentException, 
-	NullPointerException, SQLException {
+	public BookingWithReferenceData insert(Map<String, String> bookingMap) throws BookingUserNotFoundException {
 
 		// Verify any UserID is valid before creating the new Booking
 		Integer bookingUserId = null;
@@ -288,10 +169,8 @@ public class BookingService {
 
 		// Create the Booking User
 		if(bookingUserId != null) {
-			try {
-				bookingUserService.insert(booking.getBookingId(), bookingUserId);
-				newBookingWithReferenceData.setBookingUserId(bookingUserId);
-			} catch(Exception override) {/*Do Nothing*/}
+			bookingUserService.insert(booking.getBookingId(), bookingUserId);
+			newBookingWithReferenceData.setBookingUserId(bookingUserId);
 		}
 
 		// Create the Booking Guest
@@ -300,33 +179,27 @@ public class BookingService {
 			String phone = bookingMap.get("bookingGuestPhone");
 			try {
 				bookingGuestService.insert(booking.getBookingId(), email, phone);
-				newBookingWithReferenceData.setBookingGuestEmail(email);
-				newBookingWithReferenceData.setBookingGuestPhone(phone);
-			} catch(Exception override) {/*Do Nothing*/}
+			} 
+			catch (BookingAlreadyExistsException e) {/*No problem if Booking Guest is already in the system*/}
+			newBookingWithReferenceData.setBookingGuestEmail(email);
+			newBookingWithReferenceData.setBookingGuestPhone(phone);
 		}
 
 		// Create the FlightBooking
 		Integer bookingFlightId = null;
 		if(bookingMap.keySet().contains("bookingFlightId")) {
 			bookingFlightId = Integer.parseInt(bookingMap.get("bookingFlightId"));
-
-			// TODO - temp disabled while flights is overhauled
-			try {
-				Optional<Flight> optionalFlight = flightBookingRepository.findByFlightById(bookingFlightId);
-				if(optionalFlight.isPresent()) {
-					try {
-						flightBookingRepository.save(new FlightBooking(booking.getBookingId(), bookingFlightId));
-						newBookingWithReferenceData.setBookingFlightId(bookingFlightId);
-					} catch(Exception override) {/*Do Nothing*/}
-				}
-			} catch(Exception ignoreAll){}
+			Optional<Flight> optionalFlight = flightBookingRepository.findByFlightById(bookingFlightId);
+			if(optionalFlight.isPresent()) {
+				flightBookingRepository.save(new FlightBooking(booking.getBookingId(), bookingFlightId));
+				newBookingWithReferenceData.setBookingFlightId(bookingFlightId);
+			}
 		}
 		return newBookingWithReferenceData;
 	}
 
-	public BookingWithReferenceData update(HashMap<String, String> bookingMap) 
-	throws BookingNotFoundException, BookingUserNotFoundException, ConnectException, 
-	IllegalArgumentException, NullPointerException, SQLException {
+	public BookingWithReferenceData update(Map<String, String> bookingMap) 
+	throws BookingNotFoundException, BookingUserNotFoundException {
 
 		// Verify any UserID is valid before updating the Booking
 		Integer bookingUserId = null;
@@ -351,10 +224,8 @@ public class BookingService {
 
 		// Update the Booking User
 		if(bookingUserId != null) {
-			try {
-				bookingUserService.update(newBooking.getBookingId(), bookingUserId);
-				newBookingWithReferenceData.setBookingUserId(bookingUserId);
-			} catch(Exception override) {/*Do Nothing*/}
+			bookingUserService.update(newBooking.getBookingId(), bookingUserId);
+			newBookingWithReferenceData.setBookingUserId(bookingUserId);
 		}
 
 		// Update the Booking Guest
@@ -362,48 +233,34 @@ public class BookingService {
 			String email = bookingMap.get("bookingGuestEmail");
 			String phone = bookingMap.get("bookingGuestPhone");
 			try {
-				bookingGuestService.update(newBooking.getBookingId(), email, phone);
-				newBookingWithReferenceData.setBookingGuestEmail(email);
-				newBookingWithReferenceData.setBookingGuestPhone(phone);
-			} catch(Exception override) {/*Do Nothing*/}
+				bookingGuestService.insert(newBookingWithReferenceData.getBookingId(), email, phone);
+			} 
+			catch (BookingAlreadyExistsException e) {/*No problem if Booking Guest is already in the system*/}
+			newBookingWithReferenceData.setBookingGuestEmail(email);
+			newBookingWithReferenceData.setBookingGuestPhone(phone);
 		}
 
 		// Update the FlightBooking (creating it if does not exists)
 		Integer bookingFlightId = null;
 		if(bookingMap.keySet().contains("bookingFlightId")) {
 			bookingFlightId = Integer.parseInt(bookingMap.get("bookingFlightId"));
-
-			// TODO - temp disabled while flights is overhauled
-			try {
-				Optional<Flight> optionalFlight = flightBookingRepository.findByFlightById(bookingFlightId);
-				if(optionalFlight.isPresent()) {
-					try {
-						Optional<FlightBooking> optionalFlightBooking = flightBookingRepository.findById(bookingId);
-						if(optionalFlightBooking.isPresent()) {
-							FlightBooking flightBooking = optionalFlightBooking.get();
-							flightBooking.setFlightId(bookingFlightId);
-							flightBookingRepository.save(flightBooking);
-							newBookingWithReferenceData.setBookingFlightId(bookingFlightId);
-						} else {
-							flightBookingRepository.save(new FlightBooking(newBooking.getBookingId(), bookingFlightId));
-							newBookingWithReferenceData.setBookingFlightId(bookingFlightId);
-						}
-					} catch(Exception override) {/*Do Nothing*/}
-				}
-			} catch(Exception ignoreAll){}
+			Optional<Flight> optionalFlight = flightBookingRepository.findByFlightById(bookingFlightId);
+			if(optionalFlight.isPresent()) {
+				flightBookingRepository.save(new FlightBooking(newBookingWithReferenceData.getBookingId(), bookingFlightId));
+				newBookingWithReferenceData.setBookingFlightId(bookingFlightId);
+			}
 		}
 		return newBookingWithReferenceData;
 	}
 
-	public void delete(Integer id) throws BookingNotFoundException, 
-	ConnectException, IllegalArgumentException, SQLException {
+	public void delete(Integer id) throws BookingNotFoundException {
 		// Delete the Booking
+		findById(id);
+		bookingRepository.deleteById(id);
+
 		// Delete the BookingUser
 		// Delete the BookingGuest
 		// Delete the FlightBooking
 		// Delete the Passenger
-
-		findById(id);
-		bookingRepository.deleteById(id);
 	}
 }
