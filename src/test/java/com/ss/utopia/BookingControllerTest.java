@@ -55,13 +55,25 @@ class BookingControllerTest {
   }
 
 
-  // validateModel
+  // Validate Models
   //=======================================================================
   @Test
   void test_validBookingTestModel() throws Exception {
     assertEquals(Integer.valueOf(1), MOCKBookingService.getTestBooking().getBookingId());
     assertEquals("ACTIVE", MOCKBookingService.getTestBooking().getBookingStatus());
     assertEquals("AFHAJKFHKAJS", MOCKBookingService.getTestBooking().getBookingConfirmationCode());
+  }
+
+  @Test
+  void test_validBookingWithReferenceDataTestModel() throws Exception {
+    assertEquals(Integer.valueOf(1), MOCKBookingService.getTestBookingWithReferenceData().getBookingId());
+    assertEquals("ACTIVE", MOCKBookingService.getTestBookingWithReferenceData().getBookingStatus());
+    assertEquals("AFHAJKFHKAJS", MOCKBookingService.getTestBookingWithReferenceData().getBookingConfirmationCode());
+    assertEquals(Integer.valueOf(28), MOCKBookingService.getTestBookingWithReferenceData().getBookingFlightId());
+    assertEquals(Integer.valueOf(143), MOCKBookingService.getTestBookingWithReferenceData().getBookingPassengerId());
+    assertEquals(Integer.valueOf(76), MOCKBookingService.getTestBookingWithReferenceData().getBookingUserId());
+    assertEquals("xyz@gmail.com", MOCKBookingService.getTestBookingWithReferenceData().getBookingGuestEmail());
+    assertEquals("7895437665", MOCKBookingService.getTestBookingWithReferenceData().getBookingGuestPhone());
   }
 
 

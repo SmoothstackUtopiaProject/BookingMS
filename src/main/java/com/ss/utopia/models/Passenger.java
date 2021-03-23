@@ -1,6 +1,5 @@
 package com.ss.utopia.models;
 
-import java.sql.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -29,7 +28,7 @@ public class Passenger {
   private String passengerLastName;
 
   @Column(name = "date_of_birth")
-  private Date passengerDateOfBirth;
+  private String passengerDateOfBirth;
 
   @Column(name = "gender")
   private String passengerSex;
@@ -47,7 +46,7 @@ public class Passenger {
     String passengerPassportId,
     String passengerFirstName,
     String passengerLastName,
-    Date passengerDateOfBirth,
+    String passengerDateOfBirth,
     String passengerSex,
     String passengerAddress,
     Boolean passengerIsVeteran
@@ -56,7 +55,7 @@ public class Passenger {
     this.passengerPassportId = passengerPassportId;
     this.passengerFirstName = passengerFirstName;
     this.passengerLastName = passengerLastName;
-    this.passengerDateOfBirth = Date.valueOf(passengerDateOfBirth.toLocalDate());
+    this.passengerDateOfBirth = passengerDateOfBirth;
     this.passengerSex = passengerSex;
     this.passengerAddress = passengerAddress;
     this.passengerIsVeteran = passengerIsVeteran;
@@ -68,7 +67,7 @@ public class Passenger {
     String passengerPassportId,
     String passengerFirstName,
     String passengerLastName,
-    Date passengerDateOfBirth,
+    String passengerDateOfBirth,
     String passengerSex,
     String passengerAddress,
     Boolean passengerIsVeteran
@@ -78,7 +77,7 @@ public class Passenger {
     this.passengerPassportId = passengerPassportId;
     this.passengerFirstName = passengerFirstName;
     this.passengerLastName = passengerLastName;
-    this.passengerDateOfBirth = Date.valueOf(passengerDateOfBirth.toLocalDate());
+    this.passengerDateOfBirth = passengerDateOfBirth;
     this.passengerSex = passengerSex;
     this.passengerAddress = passengerAddress;
     this.passengerIsVeteran = passengerIsVeteran;
@@ -124,12 +123,12 @@ public class Passenger {
     this.passengerLastName = passengerLastName;
   }
 
-  public Date getPassengerDateOfBirth() {
-    return Date.valueOf(passengerDateOfBirth.toLocalDate());
+  public String getPassengerDateOfBirth() {
+    return passengerDateOfBirth;
   }
 
-  public void setPassengerDateOfBirth(Date passengerDateOfBirth) {
-    this.passengerDateOfBirth = Date.valueOf(passengerDateOfBirth.toLocalDate());
+  public void setPassengerDateOfBirth(String passengerDateOfBirth) {
+    this.passengerDateOfBirth = passengerDateOfBirth;
   }
 
   public String getPassengerSex() {

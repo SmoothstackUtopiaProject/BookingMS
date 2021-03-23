@@ -2,6 +2,7 @@ package com.ss.utopia.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -10,6 +11,7 @@ import javax.persistence.Table;
 public class BookingGuest {
   
   @Id
+	@GeneratedValue
 	@Column(name = "booking_id")
 	private Integer bookingGuestId;
 
@@ -20,8 +22,12 @@ public class BookingGuest {
 	private String bookingGuestPhone;
 
   public BookingGuest(){}
+  public BookingGuest(String bookingGuestEmail, String bookingGuestPhone) {
+    this.bookingGuestEmail = bookingGuestEmail;
+    this.bookingGuestPhone = bookingGuestPhone;
+  }
+
   public BookingGuest(Integer bookingGuestId, String bookingGuestEmail, String bookingGuestPhone) {
-    super();
     this.bookingGuestId = bookingGuestId;
     this.bookingGuestEmail = bookingGuestEmail;
     this.bookingGuestPhone = bookingGuestPhone;

@@ -49,6 +49,18 @@ public class User {
 	private String userToken;
 
 	public User() {}
+
+	public User(Integer userId, Role userRole, String userFirstName, String userLastName, 
+	String userEmail, String userPassword, String userPhone) {
+		this.userId = userId;
+		this.userRole = userRole;
+		this.userFirstName = userFirstName;
+		this.userLastName = userLastName;
+		this.userEmail = userEmail;
+		this.userPassword = userPassword;
+		this.userPhone = userPhone;
+	}
+
 	public User(Role userRole, String userFirstName, String userLastName, 
 	String userEmail, String userPassword, String userPhone) {
 
