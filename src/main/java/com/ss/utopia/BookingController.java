@@ -57,15 +57,17 @@ public class BookingController {
 			: new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
-	@GetMapping("{path}")
-	public ResponseEntity<Object> findByBookingId(@PathVariable String path) throws BookingNotFoundException {
-		Integer bookingId = Integer.parseInt(path);
-		BookingWithReferenceData bookingWithReferenceData = bookingService.findByIdWithReferenceData(bookingId);
+	@GetMapping("{bookingId}")
+	public ResponseEntity<Object> findById(@PathVariable String bookingId) 
+	throws BookingNotFoundException, NumberFormatException {
+		Integer formattedBookingId = Integer.parseInt(bookingId);
+		BookingWithReferenceData bookingWithReferenceData = bookingService.findByIdWithReferenceData(formattedBookingId);
 		return new ResponseEntity<>(bookingWithReferenceData, HttpStatus.OK);
 	}
 
 	@PostMapping("/search")
-	public ResponseEntity<Object> findBySearchAndFilter(@RequestBody Map<String, String> filterMap) {
+	public ResponseEntity<Object> findBySearchAndFilter(@RequestBody Map<String, String> filterMap) 
+	throws NumberFormatException {
 		List<BookingWithReferenceData> bookings = bookingService.findBySearchAndFilter(filterMap);
 		return !bookings.isEmpty()
 			? new ResponseEntity<>(bookings, HttpStatus.OK)
@@ -73,23 +75,25 @@ public class BookingController {
 	}
 
 	@PostMapping()
-	public ResponseEntity<Object> insert(@RequestBody Map<String, String> bookingMap) throws BookingUserNotFoundException {
+	public ResponseEntity<Object> insert(@RequestBody Map<String, String> bookingMap) 
+	throws BookingUserNotFoundException, NumberFormatException {
 		BookingWithReferenceData newBooking = bookingService.insert(bookingMap);
 		return new ResponseEntity<>(newBooking, HttpStatus.CREATED); 
 	}
 
 	@PutMapping()
 	public ResponseEntity<Object> update(@RequestBody Map<String, String> bookingMap) 
-	throws BookingNotFoundException, BookingUserNotFoundException {
+	throws BookingNotFoundException, BookingUserNotFoundException, NumberFormatException {
 		BookingWithReferenceData updatedBooking = bookingService.update(bookingMap);
 		return new ResponseEntity<>(updatedBooking, HttpStatus.ACCEPTED);
 	}
 
-	@DeleteMapping("{bookingIdString}")
-	public ResponseEntity<Object> delete(@PathVariable String bookingIdString) throws BookingNotFoundException {
-		Integer bookingId = Integer.parseInt(bookingIdString);
-		bookingService.delete(bookingId);
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	@DeleteMapping("{bookingId}")
+	public ResponseEntity<Object> delete(@PathVariable String bookingId) 
+	throws BookingNotFoundException, NumberFormatException {
+		Integer formattedBookingId = Integer.parseInt(bookingId);
+		String deleteInformation = bookingService.delete(formattedBookingId);
+		return new ResponseEntity<>(deleteInformation, HttpStatus.ACCEPTED);
 	}
 
 
@@ -145,6 +149,15 @@ public class BookingController {
 	public ResponseEntity<Object> invalidMessage() {
 		return new ResponseEntity<>(
 			new ErrorMessage("Invalid HTTP message content."), 
+			HttpStatus.BAD_REQUEST
+		);
+	}
+
+	@ExceptionHandler(NumberFormatException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ResponseEntity<Object> invalidParameters(Throwable err) {
+		return new ResponseEntity<>(
+			new ErrorMessage(err.getMessage()), 
 			HttpStatus.BAD_REQUEST
 		);
 	}

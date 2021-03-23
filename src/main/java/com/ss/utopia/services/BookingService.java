@@ -102,7 +102,9 @@ public class BookingService {
 		return optionalBooking.get();
 	}
 
-	public BookingWithReferenceData findByIdWithReferenceData(Integer bookingId) throws BookingNotFoundException {
+	public BookingWithReferenceData findByIdWithReferenceData(Integer bookingId) 
+	throws BookingNotFoundException {
+		
 		Optional<Booking> optionalBooking = bookingRepository.findById(bookingId);
 		if(!optionalBooking.isPresent()) {
 			throw new BookingNotFoundException(
@@ -143,7 +145,8 @@ public class BookingService {
 		return bookingWithReferenceData;
 	}
 	
-	public List<BookingWithReferenceData> findBySearchAndFilter(Map<String, String> filterMap) {
+	public List<BookingWithReferenceData> findBySearchAndFilter(Map<String, String> filterMap)
+	throws NumberFormatException {
 		List<BookingWithReferenceData> bookings = findAllWithReferenceData();
 		if(!filterMap.keySet().isEmpty()) {
 			bookings = BookingFilters.apply(bookings, filterMap);
@@ -151,7 +154,8 @@ public class BookingService {
 		return bookings;
 	}
 
-	public BookingWithReferenceData insert(Map<String, String> bookingMap) throws BookingUserNotFoundException {
+	public BookingWithReferenceData insert(Map<String, String> bookingMap) 
+	throws BookingUserNotFoundException, NumberFormatException {
 
 		// Verify any UserID is valid before creating the new Booking
 		Integer bookingUserId = null;
@@ -199,7 +203,7 @@ public class BookingService {
 	}
 
 	public BookingWithReferenceData update(Map<String, String> bookingMap) 
-	throws BookingNotFoundException, BookingUserNotFoundException {
+	throws BookingNotFoundException, BookingUserNotFoundException, NumberFormatException {
 
 		// Verify any UserID is valid before updating the Booking
 		Integer bookingUserId = null;
@@ -253,14 +257,9 @@ public class BookingService {
 		return newBookingWithReferenceData;
 	}
 
-	public void delete(Integer id) throws BookingNotFoundException {
-		// Delete the Booking
-		findById(id);
-		bookingRepository.deleteById(id);
-
-		// Delete the BookingUser
-		// Delete the BookingGuest
-		// Delete the FlightBooking
-		// Delete the Passenger
+	public String delete(Integer bookingId) throws BookingNotFoundException {
+		findById(bookingId);
+		bookingRepository.deleteById(bookingId);
+		return "Booking with ID: " + bookingId + " was deleted.";
 	}
 }
