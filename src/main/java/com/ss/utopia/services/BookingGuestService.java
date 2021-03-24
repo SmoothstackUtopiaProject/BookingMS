@@ -23,7 +23,7 @@ public class BookingGuestService {
 	@Autowired 
 	private BookingService bookingService;
 
-	private static final Pattern REGEX_EMAIL = Pattern.compile("[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,15}/g");
+	private static final Pattern REGEX_EMAIL = Pattern.compile("^(.+)@(.+)$");
   private static final Pattern REGEX_PHONE = Pattern.compile("^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-s./0-9]*$");
 
 	public List<BookingGuest> findAll() {
