@@ -30,9 +30,9 @@ import com.ss.utopia.services.BookingUserService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
@@ -40,22 +40,22 @@ class BookingServiceTest {
 
   private final ObjectMapper mapper = new ObjectMapper();
 
-  @InjectMocks
+  @Autowired
   private BookingService service;
 
-  @Mock
+  @MockBean
   private BookingRepository bookingRepository;
 
-  @Mock
+  @MockBean
   private BookingGuestService bookingGuestService;
 
-  @Mock
+  @MockBean
   private BookingUserService bookingUserService;
 
-  @Mock
+  @MockBean
   private FlightBookingRepository flightBookingRepository;
 
-  @Mock
+  @MockBean
   private PassengerRepository passengerRepository;
 
   @BeforeEach
