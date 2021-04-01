@@ -9,28 +9,30 @@ pipeline {
 
     stages {
         stage('Environment') {
-            // List Environment Variables for easy trouble-shooting
-            // To keep secrets kept safe, regulate Jenkins HTTP & SSH access
-            echo "ENVIRONMENT VARIABLES:"
-            echo "========================================================="
-            echo "========================================================="
-            echo "Application Name: $APPLICATION_NAME"
-            echo "Application Name (lowercase): $APPLICATION_NAME_LOWERCASE"
-            echo "Application Repository: $APPLICATION_REPOSITORY"
-            echo "AWS ID: $AWS_ID"
-            echo "AWS Login: $AWS_LOGIN"
-            echo "Commit Hash: $COMMIT_HASH"
-            echo "Database URL: $DB_URL"
-            echo "Database Username: $DB_USERNAME"
-            echo "Database Password: $DB_PASSWORD"
-            echo "Execution Role ARN: $EXECUTION_ROLE_ARN"
-            echo "Security Group ID: $SECURITY_GROUP_ID"
-            echo "Subnet ID: $SUBNET_ID"
-            echo "Target Group ARN (development): $UTOPIA_BOOKINGMS_TARGETGROUP_DEV"
-            echo "Target Group ARN (production): $UTOPIA_BOOKINGMS_TARGETGROUP_PROD"
-            echo "VPC ID: $VPC_ID"
-            echo "========================================================="
-            echo "========================================================="
+            steps {
+                // List Environment Variables for easy trouble-shooting
+                // To keep secrets kept safe, regulate Jenkins HTTP & SSH access
+                echo "ENVIRONMENT VARIABLES:"
+                echo "========================================================="
+                echo "========================================================="
+                echo "Application Name: $APPLICATION_NAME"
+                echo "Application Name (lowercase): $APPLICATION_NAME_LOWERCASE"
+                echo "Application Repository: $APPLICATION_REPOSITORY"
+                echo "AWS ID: $AWS_ID"
+                echo "AWS Login: $AWS_LOGIN"
+                echo "Commit Hash: $COMMIT_HASH"
+                echo "Database URL: $DB_URL"
+                echo "Database Username: $DB_USERNAME"
+                echo "Database Password: $DB_PASSWORD"
+                echo "Execution Role ARN: $EXECUTION_ROLE_ARN"
+                echo "Security Group ID: $SECURITY_GROUP_ID"
+                echo "Subnet ID: $SUBNET_ID"
+                echo "Target Group ARN (development): $UTOPIA_BOOKINGMS_TARGETGROUP_DEV"
+                echo "Target Group ARN (production): $UTOPIA_BOOKINGMS_TARGETGROUP_PROD"
+                echo "VPC ID: $VPC_ID"
+                echo "========================================================="
+                echo "========================================================="
+            }
         }
         stage('Package') {
             steps {
